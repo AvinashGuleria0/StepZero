@@ -70,6 +70,7 @@ class _TriageScreenState extends State<TriageScreen> {
       Permission.microphone,
       Permission.location,
       Permission.sms,
+      Permission.phone,
     ].request();
     print("[FRONTEND LOG] Permissions Result: $statuses");
   }
@@ -221,7 +222,8 @@ class _TriageScreenState extends State<TriageScreen> {
 
   void _fireEmergencySMS(double lat, double lng) async {
     String mapLink = "https://maps.google.com/?q=$lat,$lng";
-    String smsMessage = "URGENT SOS: StepZero AI has intercepted a CRITICAL incident (Heart Spike/Heatstroke). Patient location: $mapLink";
+    // String smsMessage = "URGENT SOS: StepZero AI has intercepted a CRITICAL incident (Heart Spike/Heatstroke). Patient location: $mapLink";
+    String smsMessage = "URGENT SOS TEST";
 
     // Send SMS blindly in the background using our custom Native Kotlin channel!
     try {
