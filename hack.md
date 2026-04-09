@@ -1,109 +1,94 @@
-## 💡 Project Overview: Proactive AI Health Triage
+## 💡 Project Overview: Project StepZero
 **The Problem Statement:** Build an AI-powered system that predicts diseases or assists in early diagnosis using symptoms, wearable data, or medical history.
 
-**Our Solution:** Most health apps are *reactive* (you get sick -> you open app -> you type symptoms). We are building a *proactive* system. Our AI silently monitors Google Fit wearable data in the background. If it spots a severe anomaly (like a 130 BPM heart rate spike while stationary), it connects the dots using local weather APIs (e.g., it’s 42°C outside) and the user's Firebase medical profile, and **talks to the user first** via an elderly-friendly Voice UI to triage the emergency. 
+**Our Solution:** We are shifting healthcare from reactive to proactive. Project StepZero integrates directly with the OS layer (**Android Health Connect**) to monitor vitals. If it detects a sudden anomaly (like a 130 BPM heart rate while sitting), it checks live local weather data (e.g., 42°C heatwave), correlates it with the user's Firebase medical history, and intercepts the user using an elderly-friendly Voice AI to triage a potential crisis (like heatstroke or cardiac event).
 
 ---
 
-## ⚙️ How it Works (The Workflow)
-1. **The Deep Onboarding:** User enters Name, Age, Weight, Allergies, Family Medical History, Lifestyle habits, and Emergency Contacts.
-2. **Background Monitoring:** App links with Google Fit to pull real-time Heart Rate (BPM).
-3. **The Trigger & Environment Check:** If a BPM anomaly occurs, the Python backend checks the user's location via OpenWeather API to get environmental context.
-4. **Voice Intercept:** The phone vibrates, and the TTS (Text-to-Speech) asks: *"Your heart rate spiked to 130 and it is 42 degrees outside. Are you feeling okay?"*
-5. **AI Evaluation (The SLM):** The user replies via Voice. The AI evaluates all 3 layers (Profile + Wearable + Voice Symptom). 
-6. **The 60-Second SOS:** If it's a critical threat (e.g., cardiac event), a red countdown starts. If not canceled in 60s, it auto-texts the emergency contact with a message and a Google Maps link to the nearest hospital.
-
-*(Hackathon Secret Weapon: Since it’s hard to force a real heart attack for the judges, we will build a hidden "Dev Toggles" screen in our Flutter app with buttons like `[Simulate HR Spike]` to flawlessly trigger the demo live.)*
-
----
-
-## 🛠️ The Tech Stack
-*   **Frontend (UI):** Flutter (Fast UI, cross-platform)
-*   **Voice/Accessibility Packages:** `speech_to_text` & `flutter_tts`
-*   **Backend System:** Python (FastAPI or Flask)
-*   **Database & Auth:** Firebase (Firestore)
-*   **AI Engine (SLM Simulation):** Groq API running Llama-3 (Blazing fast inference, mimics local edge processing without crashing the mobile device).
-*   **APIs Used:**
-    *   **Google Fit API** (Wearable data simulation/connection)
-    *   **OpenWeatherMap API** (Environmental context)
-    *   **Google Maps API** (Nearest hospital location for SOS)
-    *   **Twilio / Local App Intent** (Triggering the SOS SMS)
+## 🛠️ The Tech Stack (Hackathon Optimized)
+*   **Frontend:** Flutter (High contrast UI, elderly-friendly)
+*   **Vital Connectivity:** **Android Health Connect API** via the Flutter `health` package (Replaces deprecated Google Fit API).
+*   **Voice Interactivity:** `speech_to_text` & `flutter_tts`
+*   **Backend & DB:** Python FastAPI + Firebase (Firestore) for Medical Profiles.
+*   **AI Engine (SLM Simulation):** Groq API (Llama-3). *Prompt Engineering rule: strictly enforced JSON-only outputs.*
+*   **SMS Integration:** Flutter `url_launcher` or `telephony` (to send native SOS SMS straight from the device, avoiding 14-day Twilio A2P telecom verifications).
+*   **External APIs:** OpenWeatherMap API & Google Maps API.
 
 ---
 
-## ✅ THE 24-HOUR HACKATHON CHECKLIST
-*Split these tasks among the team right now!*
+## ✅ THE 24-HOUR EXECUTION CHECKLIST
 
 ### Phase 1: Foundation & APIs (Hours 1-4)
 - [ ] Initialize Flutter project & setup Firebase App.
-- [ ] Initialize Python FastAPI backend environment.
-- [ ] Obtain API Keys: Groq (Llama 3), Google Maps, OpenWeather.
-- [ ] Obtain Google Fit OAuth/API credentials via Google Cloud Console.
+-[ ] Initialize Python FastAPI backend environment.
+- [ ] Obtain API Keys: Groq, Google Maps, OpenWeather.
+- [ ] **Mobile OS Fix:** Setup Android Manifest permissions for Android Health Connect (Testing requires an Android 14+ emulator/device). 
 
-### Phase 2: App & UI Development (Hours 4-12)
--[ ] Build User Onboarding Flow UI (Profile form storing to Firestore).
-- [ ] Build Main Screen (High contrast, elderly-friendly, massive Voice Mic button).
-- [ ] Implement `speech_to_text` so user voice converts to text.
-- [ ] Implement `flutter_tts` so app can speak back.
-- [ ] Build the "Hidden Dev Toggle Screen" (Buttons to force a HR=130 spike).
+### Phase 2: App, UI & "The Simulation" (Hours 4-12)
+- [ ] Build User Onboarding Flow (Save Age, Allergies, Heart History to Firestore).
+- [ ] Build Main Screen (Massive Voice Mic button for accessibility).
+- [ ] Implement `speech_to_text` & `flutter_tts`.
+- [ ] **Crucial Fix:** Build the "Dev Toggle Dashboard." Do not write background isolates—OS Doze limits will kill it. Create manual buttons to inject dummy JSON payloads (e.g., `[Simulate HR Spike = 135]`) to seamlessly trigger the workflow live.
 
-### Phase 3: Backend Logic & AI Engine (Hours 12-18)
-- [ ] Write Python endpoint to receive `(WearableData, UserProfile, UserVoiceText, Weather)`.
-- [ ] Write the Groq System Prompt instructing the AI to output evaluation JSON.
-- [ ] Build the Weather integration (Take Lat/Long, get Temp/Condition).
--[ ] Build the 60-Second Auto-SOS Trigger logic & Countdown UI.
+### Phase 3: Backend Logic & Strict AI Parsing (Hours 12-18)
+- [ ] Write Python endpoint to receive `(HealthConnectData, UserProfile, VoiceText, Weather)`.
+- [ ] **Crucial Fix:** Implement the aggressive Groq prompt: *"You are an evaluation engine. You receive (HR, Temp, Profile, Symptoms). Output ONLY a valid JSON object with exactly two keys: `{"threat_level": "CRITICAL/MODERATE/SAFE", "condition_guess": "string"}`. No markdown, no conversational text."*
+- [ ] Build the Weather integration (Lat/Long -> Temp).
+- [ ] Build the 60-Second Auto-SOS Countdown UI.
 
-### Phase 4: Integration, Pitch & Polish (Hours 18-24)
-- [ ] Connect Flutter frontend to Python backend.
-- [ ] Test the demo flow end-to-end flawlessly using the hidden toggles.
-- [ ] Build the final PPT (See strict format below).
-- [ ] Practice the live presentation. 
+### Phase 4: Integrations (Hours 18-24)
+- [ ] **Crucial Fix:** Integrate local SMS dispatch (using `url_launcher` to prefill the messaging app with: *"SOS: [User] is having a medical emergency. Coordinates: [Google Maps Link]"*). 
+- [ ] Rehearse demo end-to-end using Dev Toggles.
+- [ ] Build final PPT. 
 
 ---
 ---
 
-# 📊 STRICT 7-SLIDE PPT TEMPLATE CONTENT
-*(Rule Check from the organizers' PDF: Max 7 slides, NO paragraphs, MUST use specific headers, vague ideas penalized).* 
+# 📊 STRICT 7-SLIDE PPT TEMPLATE (Updated)
+*(Adhering strictly to PDF Rules: Max 7 slides, NO paragraphs, MUST use exact headers).* 
 
-**Title Slide:** Team Falcon Claw (Add Member Names & Roll Nos). Project: Proactive AI Health Triage.
+**Title Slide:** 
+Project StepZero (By Team Falcon Claw)
+Member 1, 2, 3, 4 | Roll Nos.
 
 **SLIDE 1: Problem Statement**
-*   AI-powered system predicting diseases using symptoms, wearables, and medical history.
-*   **Core Issue:** Most health tech is *reactive* (waits for user to get sick).
-*   **Target Problem:** During critical emergencies (e.g., heatstroke, cardiac arrest), users cannot type or explain symptoms.
-*   **The Need:** A system that predicts crises *before* they escalate using background data.
+*   Building an AI system to predict diseases using symptoms, wearables, and medical history.
+*   **The Flaw:** Most digital health tools are *reactive*—users must identify they are sick first.
+*   **The Target:** Critical medical events (strokes, heat exhaustion) where users are incapacitated.
+*   **The Need:** A system that initiates diagnosis *before* the user actively asks for help.
 
 **SLIDE 2: Current Challenges**
-*   **Delayed Triage:** Apps wait for user input, losing the "golden hour" in emergencies.
-*   **Context Blindness:** Wearables see a heart-rate spike but lack medical and environmental context (is it a run, or is it a stroke?).
-*   **Inaccessibility:** Complex typing interfaces block elderly/chronically ill users from digital healthcare.
+*   **Delayed Triage:** Apps wait for user input, causing fatal delays during the "golden hour" of medical emergencies.
+*   **Data Silos:** Wearables detect an anomaly, but lack medical history and environmental context (Is HR high due to exercise, or 42°C heat, or a cardiac defect?).
+*   **Inaccessibility:** Complex typing apps block elderly users from urgent healthcare access.
 
 **SLIDE 3: Proposed Solution**
-*   **Proactive AI Agent:** Continuously monitors wearable anomalies and initiates conversation if danger is sensed.
-*   **Voice-First Interface:** Replaces typing with accessible STT (Speech-To-Text) and TTS (Text-to-Speech).
-*   **Tri-Layer Context Engine:** Merges Medical Profile (Firebase) + Real-Time Wearable Data (Google Fit) + Live Symptom Voice Input.
+*   **Project StepZero:** A proactive, voice-activated Edge AI Agent. 
+*   **Background Monitoring:** Actively queries local biometric data rather than waiting for text inputs.
+*   **Tri-Layer Contextual Triage:** Unifies Medical History + Real-time Biometrics + Environmental Weather APIs into a single analytical pipeline.
 
 **SLIDE 4: Solution Workflow**
-*   **Monitor:** Background app scans Google Fit data continuously.
-*   **Detect & Correlate:** Anomaly detected (e.g., HR > 130). AI fetches location weather (e.g., 42°C) via OpenWeather API.
-*   **Engage:** App automatically asks user via Voice, *"Your heart rate is high in extreme heat. How do you feel?"*
-*   **Evaluate:** Python SLM backend processes the voice response against user's clinical profile to predict the condition.
+*   **Listen:** System accesses background vitals via Android Health Connect.
+*   **Detect:** Anomalous baseline shift occurs (e.g., resting HR hits 130). AI pulls OpenWeather data.
+*   **Intercept:** Phone initiates conversational Voice check-in: *"Your vitals are high, are you experiencing chest pain?"*
+*   **Evaluate:** Python AI backend strictly outputs triage JSON.
+*   **Escalate:** High-risk threat starts 60-second native SOS dispatch.
 
 **SLIDE 5: Key Features**
-*   **Environmental Triage:** Cross-references vitals with local weather context (e.g., heat exhaustion detection).
-*   **On-Device Privacy First:** High-speed LLM processing built for Edge SLM architecture logic.
-*   **Elderly-Accessible UI:** Zero-type, high-contrast, conversational app interface.
-*   **Automated 60-Second SOS:** Countdown timer that auto-sends SMS + nearest hospital GPS to contacts if not manually canceled. 
+*   **Android Health Connect Native Integration:** Future-proofed biometrics access (replaces legacy Google Fit).
+*   **Environmental Correlator:** Reduces false positives by matching symptoms to local weather APIs.
+*   **Elderly-Accessible UI:** Voice-First interface powered by rapid STT/TTS engine.
+*   **Device-Native SOS Bypass:** Avoids API bottlenecks by triggering the local sim hardware to send emergency text + map coordinates.
 
 **SLIDE 6: Technical Approach**
-*   **Frontend:** Flutter (Mobile) with `speech_to_text` integration.
-*   **Backend:** Python Fast API for fast data parsing and triage routing.
-*   **AI Brain:** Groq API (Llama-3 model) for low-latency contextual medical inference.
-*   **Data Pipeline:** Firebase (Profile/Auth) + Google Fit (Biometrics) + Weather & Maps APIs.
+*   **Frontend App:** Flutter & Dart. 
+*   **OS Health API:** Android Health Connect (Android 14+ compliant). 
+*   **Backend Inference:** Python FastAPI utilizing an aggressive JSON-prompted LLM (Llama-3 via Groq) to simulate rapid Edge-AI.
+*   **Cloud Architecture:** Firebase (Firestore logic, authentication) coupled with precise external geofencing APIs.
 
 **SLIDE 7: Impact & Future Scope**
-*   **Immediate Impact:** Secures early-warning care for the elderly, disabled, and isolated individuals.
-*   **Reduced Fatalities:** Intercepts conditions like dehydration and arrhythmias before they require an ambulance.
+*   **Immediate Impact:** Bridges the gap between passive hardware tracking and active clinical intervention for at-risk demographics. 
+*   **Clinical Reliability:** Shifts reliance away from user "guessing" their symptoms.
 *   **Future Scope:** 
-    *   Full multi-agent deployment on edge smartwatch operating systems.
-    *   Integration with IoT medical devices (Glucometers, BP Monitors).
+    *   Transition logic fully on-device natively using optimized open-weights SLMs (Llama.cpp on mobile). 
+    *   Integration with external clinical dashboard APIs. 
